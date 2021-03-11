@@ -1,6 +1,6 @@
 import cv2
-from ..yolov5_ts_detect.utils.datasets import letterbox
 import numpy as np
+from ..yolov5_ts_detect.utils.datasets import letterbox
 
 
 class VideoLoader:

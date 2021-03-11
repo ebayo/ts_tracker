@@ -1,6 +1,3 @@
-# import sys
-# sys.path.insert(1, '~/TFM-dev/')
-
 import torch
 from ..yolov5_ts_detect.utils.general import non_max_suppression
 
