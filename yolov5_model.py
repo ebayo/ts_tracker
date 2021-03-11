@@ -1,5 +1,8 @@
 import torch
-from ..yolov5_ts_detect.utils.general import non_max_suppression
+
+import sys
+sys.path.append('../yolov5_ts_detect')
+from utils.general import non_max_suppression
 
 
 class YOLOv5:

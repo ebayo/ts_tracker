@@ -10,7 +10,7 @@ def track_ts(opt, hyp):
     yolo_net = YOLOv5(opt.weights, hyp)
 
     i = 0
-    for frame in vid_loader:
+    for frame, frame0 in vid_loader:
         pred = yolo_net.inference(frame)
         print('Prediction after nms'.format(pred))
         i += 1
