@@ -1,4 +1,4 @@
-device: 0
+device: '0'
 
 # yolo detections
 nms_th: 0.25

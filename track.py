@@ -16,7 +16,7 @@ def track_ts(opt, hyp):
     # initialize video loader, yolov5 network and deep_sort tracking objects
     vid_loader = VideoLoader(opt.video)
     yolo_net = yolo.Yolo5Model(opt.weights, hyp)
-    deep_sort = ds.DeepSort(opt.net, hyp, yolo_net.get_names())
+    deep_sort = ds.DeepSort(opt.descriptor_net, hyp)
     results_writer = open(opt.result_file, 'w')
 
     vid_out = None
@@ -33,11 +33,20 @@ def track_ts(opt, hyp):
     for frame, frame0 in vid_loader:
         print('Processing frame {}/{}'.format(frame_idx, vid_loader.num_frames))
 
+        if frame is None:
+            print('Video is finished')
+            break;
+
         yolo_detect = yolo_net.inference(frame, frame0)  # Columns are [x1 y1 x2 y2 conf class] (not normalized)
 
         confidences = [b[4] for b in yolo_detect]
         labels = [b[5] for b in yolo_detect]
-        bboxes = ts.xyxy2xywh(yolo_detect)
+
+        if hyp['device'] == 'cpu':
+            bboxes = ts.xyxy2tlwh(yolo_detect)
+        else:
+            bboxes = ts.xyxy2tlwh(yolo_detect).detach().cpu()
+        bboxes = bboxes.numpy()
 
         deep_sort.track(frame0, bboxes, confidences, labels)
 
@@ -47,7 +56,7 @@ def track_ts(opt, hyp):
                 if not track.is_confirmed() or track.time_since_update > 1:
                     continue
                 bbox = track.to_tlbr()
-                class_name = track.get_class_name()
+                class_name = yolo_net.get_name(track.label)
                 color = colors[int(track.track_id) % len(colors)]
                 color = [j * 255 for j in color]
                 cv2.rectangle(frame0, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), color, 2)
@@ -67,13 +76,11 @@ def track_ts(opt, hyp):
             if not track.is_confirmed() or track.time_since_update > 1:
                 continue
             bbox = track.to_tlbr()
-            class_name = track.get_class_name()
-            results_writer.write(str(frame_idx) + ' ' + track.track_id + ' ' + class_name + ' ' +
-                               bbox[0] + ' ' + bbox[1] + ' ' + bbox[2] + ' ' + bbox[3] + '\n')
+            results_writer.write('{} {} {} {} {} {} {}\n'.format(frame_idx, track.track_id, track.label,
+                                                               bbox[0], bbox[1], bbox[2], bbox[3]))
 
         frame_idx += 1
-        if frame_idx > 5:
-            break
+
 
     vid_loader.close()
     vid_out.release()

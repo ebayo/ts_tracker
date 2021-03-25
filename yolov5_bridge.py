@@ -3,19 +3,21 @@ import sys
 
 sys.path.append('../yolov5')
 import utils.general as gen
+import utils.torch_utils as tu
 
 
 class Yolo5Model:
     def __init__(self, weights, hyp, image_size=640):
         # from yolov5/models/experimental.py>attempt_load()
-        self.device = hyp['device']
+        self.device = tu.select_device(hyp['device'])
         self.imgsz = image_size
         self.nms_th = hyp['nms_th']
         self.iou_th = hyp['iou_th']
         self.model = torch.load(weights, map_location=self.device)['model'].float().fuse().eval()
+        self.names = self.model.module.names if hasattr(self.model, 'module') else self.model.names
 
-    def get_names(self):
-        return self.model.module.names if hasattr(self.model, 'module') else self.model.names
+    def get_name(self, idx):
+        return self.names[idx]
 
     def inference(self, img, im0):
         img = torch.from_numpy(img).to(self.device)

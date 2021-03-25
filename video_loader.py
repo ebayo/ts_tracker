@@ -26,6 +26,7 @@ class VideoLoader:
         ret_val, img0 = self.capture.read()
         if not ret_val:
             self.capture.release()
+            return None, None
         self.current_frame += 1
 
         # TODO: check Yolo needs this
