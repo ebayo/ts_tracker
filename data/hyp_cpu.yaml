@@ -1,0 +1,10 @@
+device: 'cpu'
+
+# yolo detections
+nms_th: 0.25
+iou_th: 0.2
+
+# deep_sort parameters
+max_cosine_distance: 0.5
+nn_budget: None
+nms_max_overlap: 1.0
