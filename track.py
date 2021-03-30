@@ -6,9 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-from video_loader import VideoLoader
-import yolov5_bridge as yolo
-import deep_sort_bridge as ds
+from track_utils.video_loader import VideoLoader
+from track_utils import deep_sort_bridge as ds, yolov5_bridge as yolo
 import ts_utils as ts
 
 
@@ -30,14 +29,14 @@ def track_ts(opt, hyp):
         vid_out = vid_loader.initialise_video_writer(opt.output_video)
 
     frame_idx = 0
-    for frame, frame0 in vid_loader:
+    for frame in vid_loader:
         print('Processing frame {}/{}'.format(frame_idx, vid_loader.num_frames))
 
         if frame is None:
             print('Video is finished')
             break;
 
-        yolo_detect = yolo_net.inference(frame, frame0)  # Columns are [x1 y1 x2 y2 conf class] (not normalized)
+        yolo_detect = yolo_net.inference(frame)  # Columns are [x1 y1 x2 y2 conf class] (not normalized)
 
         confidences = [b[4] for b in yolo_detect]
         labels = [b[5] for b in yolo_detect]
@@ -48,7 +47,7 @@ def track_ts(opt, hyp):
             bboxes = ts.xyxy2tlwh(yolo_detect).detach().cpu()
         bboxes = bboxes.numpy()
 
-        deep_sort.track(frame0, bboxes, confidences, labels)
+        deep_sort.track(frame, bboxes, confidences, labels)
 
         # Visualization and save video
         if opt.display or opt.save_video:
@@ -59,17 +58,17 @@ def track_ts(opt, hyp):
                 class_name = yolo_net.get_name(track.label)
                 color = colors[int(track.track_id) % len(colors)]
                 color = [j * 255 for j in color]
-                cv2.rectangle(frame0, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), color, 2)
-                cv2.rectangle(frame0, (int(bbox[0]), int(bbox[1] - 30)),
+                cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), color, 2)
+                cv2.rectangle(frame, (int(bbox[0]), int(bbox[1] - 30)),
                               (int(bbox[0]) + (len(class_name) + len(str(track.track_id))) * 17, int(bbox[1])), color, -1)
-                cv2.putText(frame0, class_name + "-" + str(track.track_id), (int(bbox[0]), int(bbox[1] - 10)), 0, 0.75,
+                cv2.putText(frame, class_name + "-" + str(track.track_id), (int(bbox[0]), int(bbox[1] - 10)), 0, 0.75,
                             (255, 255, 255), 2)
 
         if opt.display:
-            cv2.imshow('output', frame0)
+            cv2.imshow('output', frame)
 
         if opt.save_video:
-            vid_out.write(frame0)
+            vid_out.write(frame)
 
         # Save results [frame track_id label x1 y1 x2 y2]
         for track in deep_sort.tracker.tracks:

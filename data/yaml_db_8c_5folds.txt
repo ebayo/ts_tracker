@@ -1,0 +1,5 @@
+../MOB-DDBB/db_8c_5folds/database_1.yaml
+../MOB-DDBB/db_8c_5folds/database_2.yaml
+../MOB-DDBB/db_8c_5folds/database_3.yaml
+../MOB-DDBB/db_8c_5folds/database_4.yaml
+../MOB-DDBB/db_8c_5folds/database_5.yaml
