@@ -22,6 +22,7 @@
 #       [ ] paths as ../-----/ --> correct if passed as such
 #       [ ] check number of images vs number of txt files
 #       [ ] images are in accepted image format --> ['bmp', 'jpg', 'jpeg', 'png', 'tif', 'tiff', 'dng'] ??
+#       [ ] create folds folders inside main folder
 
 import argparse
 import os

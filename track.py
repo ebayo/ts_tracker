@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-from track_utils.video_loader import VideoLoader
-from track_utils import deep_sort_bridge as ds, yolov5_bridge as yolo
+from ts_utils.video_loader import VideoLoader
+from ts_utils import yolov5_bridge as yolo
 import ts_utils as ts
 
 
@@ -30,7 +30,7 @@ def track_ts(opt, hyp):
 
     frame_idx = 0
     for frame in vid_loader:
-        print('Processing frame {}/{}'.format(frame_idx, vid_loader.num_frames))
+        print('Processing img {}/{}'.format(frame_idx, vid_loader.num_frames))
 
         if frame is None:
             print('Video is finished')
@@ -70,7 +70,7 @@ def track_ts(opt, hyp):
         if opt.save_video:
             vid_out.write(frame)
 
-        # Save results [frame track_id label x1 y1 x2 y2]
+        # Save results [img track_id label x1 y1 x2 y2]
         for track in deep_sort.tracker.tracks:
             if not track.is_confirmed() or track.time_since_update > 1:
                 continue
@@ -101,6 +101,8 @@ if __name__ == '__main__':
     parser.add_argument('--display', action='store_true')
     parser.add_argument('--output_video', type=str, default='data/output.mp4')
     parser.add_argument('--save_video', action='store_true')
+    parser.add_argument('--torch', action='store_true',
+                        help='Flag to use the pytorch implementation of deep_sort')
 
     param = parser.parse_args()
 
@@ -110,5 +112,10 @@ if __name__ == '__main__':
     for k in hyp.keys():
         if isinstance(hyp[k], str) and hyp[k] == 'None':
             hyp[k] = None
+
+    if param.torch:
+        from ts_utils import deep_sort_torch_bridge as ds
+    else:
+        from ts_utils import deep_sort_bridge as ds
 
     track_ts(param, hyp)

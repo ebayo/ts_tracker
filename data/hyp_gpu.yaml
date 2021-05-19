@@ -1,7 +1,7 @@
 device: '0'
 
 # yolo detections
-nms_th: 0.25
+conf_th: 0.25
 iou_th: 0.2
 
 # deep_sort parameters

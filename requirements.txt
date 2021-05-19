@@ -5,6 +5,7 @@ numpy>=1.18.5
 
 # deep_sort
 tensorflow==1.5     # doesn't work with 2.0
+scikit-learn==0.22.2
 
 # YOLOv5
 torch>=1.7.0

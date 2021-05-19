@@ -1,6 +1,6 @@
-/imatge/ebayo/TFM/yolov5_ts_detect/runs/train/ex_m_8c_5k_1/weights/best.pt
-/imatge/ebayo/TFM/yolov5_ts_detect/runs/train/ex_m_8c_5k_2/weights/best.pt
-/imatge/ebayo/TFM/yolov5_ts_detect/runs/train/ex_m_8c_5k_3/weights/best.pt
-/imatge/ebayo/TFM/yolov5_ts_detect/runs/train/ex_m_8c_5k_4/weights/best.pt
-/imatge/ebayo/TFM/yolov5_ts_detect/runs/train/ex_m_8c_5k_5/weights/best.pt
+../yolov5_ts_detect/runs/train/ex_m_8c_5k_1/weights/best.pt
+../yolov5_ts_detect/runs/train/ex_m_8c_5k_2/weights/best.pt
+../yolov5_ts_detect/runs/train/ex_m_8c_5k_3/weights/best.pt
+../yolov5_ts_detect/runs/train/ex_m_8c_5k_4/weights/best.pt
+../yolov5_ts_detect/runs/train/ex_m_8c_5k_5/weights/best.pt
 

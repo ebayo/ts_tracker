@@ -45,14 +45,14 @@ METRICS = {'P': {'col': 11, 'name': 'Precision'},
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--files', type=str,
+    parser.add_argument('files', type=str,
                         help='name of the file with the locations of the results files for each fold')
     # parser.add_argument('-c', '-classes', type=str,
     #                    help='File with the name of the classes, same used in database_split')
-    parser.add_argument('-m', '--metric', choices=[*METRICS.keys(), 'all'],
+    parser.add_argument('-m', '--metric', choices=[*METRICS.keys(), 'all'], default='all',
                         help='Metric to show the graphic')
 
-    parser.add_argument('-n', '--name', type=str, default='results.png',
+    parser.add_argument('-n', '--name', type=str, default='data/results.png',
                         help='Name and path to save the picture')
 
     param = parser.parse_args()

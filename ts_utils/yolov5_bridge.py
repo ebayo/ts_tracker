@@ -11,7 +11,6 @@ sys.path.append('../yolov5')
 import utils.general as gen
 import utils.torch_utils as tu
 import utils.datasets as ds
-import utils.metrics as met
 
 img_formats = ['bmp', 'jpg', 'jpeg', 'png', 'tif', 'tiff', 'dng', 'webp']  # acceptable image suffixes
 vid_formats = ['mov', 'avi', 'mp4', 'mpg', 'mpeg', 'm4v', 'wmv', 'mkv']  # acceptable video suffixes
@@ -20,20 +19,23 @@ vid_formats = ['mov', 'avi', 'mp4', 'mpg', 'mpeg', 'm4v', 'wmv', 'mkv']  # accep
 class Yolo5Model:
     def __init__(self, weights, hyp, image_size=640):
         # from yolov5/models/experimental.py>attempt_load()
-        self.device = tu.select_device(hyp['device'])
-        self.img_size = image_size
-        self.nms_th = hyp['nms_th']
-        self.iou_th = hyp['iou_th']
-        self.model = torch.load(weights, map_location=self.device)['model'].float().fuse().eval()
-        print('Model loaded successfully.\n')
-        self.names = self.model.module.names if hasattr(self.model, 'module') else self.model.names
+        with torch.no_grad():
+            self.device = tu.select_device(hyp['device'])
+            self.img_size = image_size
+            self.conf_th = hyp['conf_th']
+            self.iou_th = hyp['iou_th']
+            self.model = torch.load(weights, map_location=self.device)['model'].float().fuse().eval()
+            print('Model loaded successfully.\n')
+            #print(self.model)
+            self.names = self.model.module.names if hasattr(self.model, 'module') else self.model.names
 
     def get_name(self, idx):
         return self.names[idx]
 
     def inference(self, im0):
-        # from yolov5/utils/datasets.py > LoadImages
+        # from yolov5/ts_utils/datasets.py > LoadImages
         # Padded resize
+
         img = ds.letterbox(im0, new_shape=self.img_size)[0]
 
         # Convert
@@ -46,14 +48,13 @@ class Yolo5Model:
         img /= 255.0  # 0 - 255 to 0.0 - 1.0
         if img.ndimension() == 3:
             img = img.unsqueeze(0)
-
-        pred = self.model(img, augment=False)[0]
+        with torch.no_grad():
+            pred = self.model(img, augment=False)[0]
         # print(predictions.shape)
 
         # Apply NMS with low threshold to do a first discard of predictions
         # predictions is list of boxes (x1, y1, x2, y2, conf, class) --> float
-
-        pred = gen.non_max_suppression(pred, self.nms_th, self.iou_th)
+        pred = gen.non_max_suppression(pred, self.conf_th, self.iou_th)
         # print(pred[0].shape)    #--> first dimension is number of classes
         pred = pred[0]  # We only predict on one image
 
@@ -63,9 +64,12 @@ class Yolo5Model:
 
         return pred
 
+    def get_named_params(self):
+        return self.model.named_parameters()
+
 
 class ImageLoader:  # for inference
-    # Adapted from yolov5/utils/datasets.py
+    # Adapted from yolov5/ts_utils/datasets.py
 
     def __init__(self, path, img_size=640, stride=32):
 
@@ -121,7 +125,7 @@ class ImageLoader:  # for inference
                     ret_val, img = self.cap.read()
 
             self.frame += 1
-            # print(f'video {self.count + 1}/{self.nf} ({self.frame}/{self.nframes}) {path}: ', end='')
+            # print(f'video {self.count + 1}/{self.nf} ({self.img}/{self.nframes}) {path}: ', end='')
 
         else:
             # Read image

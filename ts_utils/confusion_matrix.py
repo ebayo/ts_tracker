@@ -3,6 +3,8 @@ import seaborn as sn
 from pathlib import Path
 import matplotlib.pyplot as plt
 
+# TODO:
+#   [ ] Unify the three functions processing batches
 
 def box_iou_calc(boxes1, boxes2):
     # https://github.com/pytorch/vision/blob/master/torchvision/ops/boxes.py
@@ -40,7 +42,7 @@ class ConfusionMatrix:
         self.IOU_THRESHOLD = IOU_THRESHOLD
 
     def process_batch(self, detections, labels):
-        '''
+        """
         Return intersection-over-union (Jaccard index) of boxes.
         Both sets of boxes are expected to be in (x1, y1, x2, y2) format.
         Arguments:
@@ -48,7 +50,7 @@ class ConfusionMatrix:
             labels (Array[M, 5]), class, x1, y1, x2, y2
         Returns:
             None, updates confusion matrix accordingly
-        '''
+        """
         detections = detections[detections[:, 4] > self.CONF_THRESHOLD]
         gt_classes = labels[:, 0].astype(np.int16)
         detection_classes = detections[:, 5].astype(np.int16)
@@ -80,6 +82,98 @@ class ConfusionMatrix:
             if all_matches.shape[0] and all_matches[all_matches[:, 1] == i].shape[0] == 0:
                 detection_class = detection_classes[i]
                 self.matrix[detection_class, self.nc] += 1
+
+    def detection_error(self, detections, labels):
+        """
+        Return intersection-over-union (Jaccard index) of boxes.
+        Both sets of boxes are expected to be in (x1, y1, x2, y2) format.
+        Arguments:
+            detections (Array[N, 6]), x1, y1, x2, y2, conf, class
+            labels (Array[M, 5]), class, x1, y1, x2, y2
+        Returns:
+            boolean, True if there is a detection error, False otherwise
+        """
+        detections = detections[detections[:, 4] > self.CONF_THRESHOLD]
+        gt_classes = labels[:, 0].astype(np.int16)
+        detection_classes = detections[:, 5].astype(np.int16)
+
+        all_ious = box_iou_calc(labels[:, 1:], detections[:, :4])
+        want_idx = np.where(all_ious > self.IOU_THRESHOLD)
+
+        all_matches = []
+        for i in range(want_idx[0].shape[0]):
+            all_matches.append([want_idx[0][i], want_idx[1][i], all_ious[want_idx[0][i], want_idx[1][i]]])
+
+        all_matches = np.array(all_matches)
+        if all_matches.shape[0] > 0:  # if there is match
+            all_matches = all_matches[all_matches[:, 2].argsort()[::-1]]
+            all_matches = all_matches[np.unique(all_matches[:, 1], return_index=True)[1]]
+            all_matches = all_matches[all_matches[:, 2].argsort()[::-1]]
+            all_matches = all_matches[np.unique(all_matches[:, 0], return_index=True)[1]]
+
+        for i, label in enumerate(labels):
+            if all_matches.shape[0] > 0 and all_matches[all_matches[:, 0] == i].shape[0] == 1:
+                gt_class = gt_classes[i]
+                detection_class = detection_classes[int(all_matches[all_matches[:, 0] == i, 1][0])]
+                if gt_class != detection_class:
+                    return True
+            else:
+                return True
+
+        for i, detection in enumerate(detections):
+            if all_matches.shape[0] and all_matches[all_matches[:, 1] == i].shape[0] == 0:
+                return True
+
+        return False
+
+    def process_batch_error(self, detections, labels):
+        """
+        Return intersection-over-union (Jaccard index) of boxes.
+        Both sets of boxes are expected to be in (x1, y1, x2, y2) format.
+        Arguments:
+            detections (Array[N, 6]), x1, y1, x2, y2, conf, class
+            labels (Array[M, 5]), class, x1, y1, x2, y2
+        Returns:
+            boolean, True if there is a detection error, False otherwise
+        """
+        detections = detections[detections[:, 4] > self.CONF_THRESHOLD]
+        gt_classes = labels[:, 0].astype(np.int16)
+        detection_classes = detections[:, 5].astype(np.int16)
+
+        all_ious = box_iou_calc(labels[:, 1:], detections[:, :4])
+        want_idx = np.where(all_ious > self.IOU_THRESHOLD)
+        error_flag = False
+
+        all_matches = []
+        for i in range(want_idx[0].shape[0]):
+            all_matches.append([want_idx[0][i], want_idx[1][i], all_ious[want_idx[0][i], want_idx[1][i]]])
+
+        all_matches = np.array(all_matches)
+        if all_matches.shape[0] > 0:  # if there is match
+            all_matches = all_matches[all_matches[:, 2].argsort()[::-1]]
+            all_matches = all_matches[np.unique(all_matches[:, 1], return_index=True)[1]]
+            all_matches = all_matches[all_matches[:, 2].argsort()[::-1]]
+            all_matches = all_matches[np.unique(all_matches[:, 0], return_index=True)[1]]
+
+        for i, label in enumerate(labels):
+            if all_matches.shape[0] > 0 and all_matches[all_matches[:, 0] == i].shape[0] == 1:
+                gt_class = gt_classes[i]
+                detection_class = detection_classes[int(all_matches[all_matches[:, 0] == i, 1][0])]
+                self.matrix[(gt_class), detection_class] += 1
+                if gt_class != detection_class:
+                    error_flag = True
+            else:
+                gt_class = gt_classes[i]
+                self.matrix[self.nc, (gt_class)] += 1
+                error_flag = True
+
+        for i, detection in enumerate(detections):
+            if all_matches.shape[0] and all_matches[all_matches[:, 1] == i].shape[0] == 0:
+                detection_class = detection_classes[i]
+                self.matrix[detection_class, self.nc] += 1
+                error_flag = True
+
+        return error_flag
 
     def return_matrix(self):
         return self.matrix
