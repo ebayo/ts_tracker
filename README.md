@@ -7,7 +7,10 @@ track.py is the main script, the others serve as bridges between the pertinent n
 
 ## Requirements
 
-- Yolov5 (https://github.com/ultralytics/yolov5) needs to be in the parent directory (or change the location in tolov5_bridge.py)
+- Yolov5 v5.0 (https://github.com/ultralytics/yolov5) needs to be in the parent directory (or change the location in tolov5_bridge.py)
+Use ```git clone --branch v5.0 https://github.com/ultralytics/yolov5.git``` to clone the specific version
+
+
 
 - deep_sort (https://github.com/nwojke/deep_sort) needs to be in the parent directory (or change the location in deep_sort_bridge.py)
      - Tensorflow in version 1.5
