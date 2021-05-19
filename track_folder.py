@@ -11,8 +11,7 @@ from tqdm import tqdm
 from ts_utils import deep_sort_bridge as ds
 from ts_utils.video_loader import VideoLoader
 from ts_utils import yolov5_bridge as yolo
-import ts_utils as ts
-
+import ts_utils.bbox_utils as ts
 
 
 def track_ts(vid_path, hyp, yolo_net):
@@ -25,7 +24,7 @@ def track_ts(vid_path, hyp, yolo_net):
 
     cmap = plt.get_cmap('tab20b')
     colors = [cmap(i)[:3] for i in np.linspace(0, 1, 20)]
-    vid_out = vid_loader.initialise_video_writer(opt.output_video)
+    vid_out = vid_loader.initialise_video_writer(os.path.join(param.output_folder, vid_path))
 
     frame_idx = 0
     for frame in vid_loader:
@@ -33,7 +32,7 @@ def track_ts(vid_path, hyp, yolo_net):
 
         if frame is None:
             print('Video is finished')
-            break;
+            break
 
         yolo_detect = yolo_net.inference(frame)  # Columns are [x1 y1 x2 y2 conf class] (not normalized)
 
@@ -61,9 +60,6 @@ def track_ts(vid_path, hyp, yolo_net):
                           (int(bbox[0]) + (len(class_name) + len(str(track.track_id))) * 17, int(bbox[1])), color, -1)
             cv2.putText(frame, class_name + "-" + str(track.track_id), (int(bbox[0]), int(bbox[1] - 10)), 0, 0.75,
                         (255, 255, 255), 2)
-
-        if opt.display:
-            cv2.imshow('output', frame)
 
         vid_out.write(frame)
 
@@ -113,4 +109,4 @@ if __name__ == '__main__':
     for vid in tqdm(os.listdir(param.video_folder)):
         if vid.endswith('.mp4'):
             # track
-            track_ts(param, hyp, net)
+            track_ts(os.path.join(param.video_folder, vid), hyp, net)
