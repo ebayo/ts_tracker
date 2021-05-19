@@ -16,7 +16,7 @@ import ts_utils.bbox_utils as ts
 
 def track_ts(vid_path, hyp, yolo_net):
     # initialize video loader, yolov5 network and deep_sort tracking objects
-    vid_loader = VideoLoader(vid_path)
+    vid_loader = VideoLoader(os.path.join(param.video_folder, vid_path))
     # yolo_net = yolo.Yolo5Model(opt.weights, hyp)
     deep_sort = ds.DeepSort(param.descriptor_net, hyp)
     res = vid_path.replace('.mp4', '.txt')
@@ -27,8 +27,8 @@ def track_ts(vid_path, hyp, yolo_net):
     vid_out = vid_loader.initialise_video_writer(os.path.join(param.output_folder, vid_path))
 
     frame_idx = 0
-    for frame in vid_loader:
-        print('Processing img {}/{}'.format(frame_idx, vid_loader.num_frames))
+    for frame in tqdm(vid_loader):
+        # print('Processing img {}/{}'.format(frame_idx, vid_loader.num_frames))
 
         if frame is None:
             print('Video is finished')
@@ -106,7 +106,8 @@ if __name__ == '__main__':
 
     net = yolo.Yolo5Model(param.weights, hyp)
 
-    for vid in tqdm(os.listdir(param.video_folder)):
+    for vid in os.listdir(param.video_folder):
         if vid.endswith('.mp4'):
             # track
-            track_ts(os.path.join(param.video_folder, vid), hyp, net)
+            print('Processing video {}'.format(vid))
+            track_ts(vid, hyp, net)
