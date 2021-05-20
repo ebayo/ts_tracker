@@ -3,11 +3,11 @@ import cv2
 
 class VideoLoader:
 
-    def __init__(self, vid_path):
+    def __init__(self, vid_path, im_size):
         self.capture = cv2.VideoCapture(vid_path)
         self.current_frame = 0
         self.num_frames = int(self.capture.get(cv2.CAP_PROP_FRAME_COUNT))
-        self.img_size = 640
+        self.img_size = im_size
 
     def __iter__(self):
         self.count = 0

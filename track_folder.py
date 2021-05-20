@@ -16,19 +16,21 @@ import ts_utils.bbox_utils as ts
 
 def track_ts(vid_path, hyp, yolo_net):
     # initialize video loader, yolov5 network and deep_sort tracking objects
-    vid_loader = VideoLoader(os.path.join(param.video_folder, vid_path))
-    # yolo_net = yolo.Yolo5Model(opt.weights, hyp)
+    vid_loader = VideoLoader(os.path.join(param.video_folder, vid_path), im_size=640)
     deep_sort = ds.DeepSort(param.descriptor_net, hyp)
-    res = vid_path.replace('.mp4', '.txt')
+
+    output_vid = os.path.join(param.output_folder, vid_path)
+    vid_out = vid_loader.initialise_video_writer(os.path.join(param.output_folder, vid_path))
+    res = output_vid.replace('.mp4', '.txt')
     results_writer = open(res, 'w')
 
     cmap = plt.get_cmap('tab20b')
     colors = [cmap(i)[:3] for i in np.linspace(0, 1, 20)]
-    vid_out = vid_loader.initialise_video_writer(os.path.join(param.output_folder, vid_path))
+
 
     frame_idx = 0
     for frame in tqdm(vid_loader):
-        # print('Processing img {}/{}'.format(frame_idx, vid_loader.num_frames))
+        # print('Processing frame {}/{}'.format(frame_idx, vid_loader.num_frames))
 
         if frame is None:
             print('Video is finished')
