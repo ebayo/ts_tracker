@@ -10,8 +10,8 @@ from ts_utils.bbox_utils import lxywhn2lxyxy
 import ts_utils.confusion_matrix as cm
 
 
-def find_images_with_errors(val_folder, weights_file, hyp, save_folder, matrix):
-    yolo_model = yolo.Yolo5Model(weights_file, hyp)
+def find_images_with_errors(val_folder, weights_file, hyp, save_folder, matrix, im_size):
+    yolo_model = yolo.Yolo5Model(weights_file, hyp, image_size=im_size)
     image_loader = yolo.ImageLoader(val_folder)
     names = yolo_model.names
 
@@ -79,6 +79,8 @@ if __name__ == '__main__':
                         help='Directory where to save the confusion matrix as a figure')
     parser.add_argument('--matrix', action='store_true',
                         help="If we want to find the confusion matrix besides the images with errors")
+    parser.add_argument('--im_size', type=int, default=640,
+                        help='image size used for training yolo')
 
     param = parser.parse_args()
 
@@ -122,7 +124,7 @@ if __name__ == '__main__':
         print('Processing fold {}/{}'.format(fold, len(val_folders)))
         save = os.path.join(param.save_dir, str(fold))
         os.makedirs(save, exist_ok=True)
-        find_images_with_errors(val, weights, hyper, save, param.matrix)
+        find_images_with_errors(val, weights, hyper, save, param.matrix, param.im_size)
         fold += 1
 
     # plot matrix
