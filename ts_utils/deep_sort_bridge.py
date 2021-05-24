@@ -1,6 +1,6 @@
-import matplotlib.pyplot as plt
-import cv2
-import numpy as np
+# Bridge between Deep_SORT code and the traffic sign tracker.
+# Add label information to tracks. Doesn't use it.
+
 import sys
 
 sys.path.append('../deep_sort')
@@ -33,6 +33,7 @@ class DeepSort:
                 det.append(LbDetection(b, c, f, int(l)))
         return det
 
+
 # Extending some of deep_sort classes to account for multiclass labeling
 
 class LbDetection(Detection):
@@ -40,12 +41,14 @@ class LbDetection(Detection):
         Detection.__init__(self, box, conf, feature)
         self.label = label
 
+
 class LbTracker(Tracker):
     def _initiate_track(self, detection):
         mean, covariance = self.kf.initiate(detection.to_xyah())
         self.tracks.append(LbTrack(mean, covariance, self._next_id, self.n_init, self.max_age,
-                                    detection.feature, label=detection.label))
+                                   detection.feature, label=detection.label))
         self._next_id += 1
+
 
 class LbTrack(Track):
     def __init__(self, mean, covariance, track_id, n_init, max_age,
@@ -65,4 +68,3 @@ class LbTrack(Track):
 
         self._n_init = n_init
         self._max_age = max_age
-

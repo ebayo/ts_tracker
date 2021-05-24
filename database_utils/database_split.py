@@ -1,28 +1,8 @@
 # script that takes a folder with images and their labels (.txt files in YOLO format) and splits the images
 # into training and validation set in the structure needed to train YoloV5
 
-# PARAMETERS
-# folder of the original DB
-# base folder for the split_sample DB --> need to go on the same level as the Yolo5 folder
-# percentage of training data [0-1]
-# file used for the names of the classes when labeling using yolo_mark (usually, names.obj)
-
-# will copy the original files into the corresponding validation and training folders, separating the label files
-# accordingly [https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data#3-organize-directories]
-# will generate the appropriate .yaml file to train yoloV5
-# [https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data#1-create-datasetyaml]
-
-# TODO: [ ] check prints
-#       [ ] clean names and options
-#       [ ] clean functions and their order
-#       [ ] improve documentation and helps
-#       [ ] check images are in a correct format
-#       [ ] check options are a valid combination / the preferences
-#       [ ] add option to have a test partition ??
-#       [ ] paths as ../-----/ --> correct if passed as such
-#       [ ] check number of images vs number of txt files
-#       [ ] images are in accepted image format --> ['bmp', 'jpg', 'jpeg', 'png', 'tif', 'tiff', 'dng'] ??
-#       [ ] create folds folders inside main folder
+# Evolved with the labeling tool (Yolo_mark, CVAT) and the split method (train/val, k-fold)
+# k-split-database.py: Newest clean version for CVAT (labels and images in different folders) and k-fold validation
 
 import argparse
 import os
@@ -31,7 +11,7 @@ import random
 import yaml
 from sklearn.model_selection import KFold
 
-# IMG_FORMATS = ['bmp', 'jpg', 'jpeg', 'png', 'tif', 'tiff', 'dng']
+# IMG_FORMATS = ['bmp', 'jpg', 'jpeg', 'png', 'tif', 'tiff', 'dng'] # Image formats accepted by YOLOv5
 
 
 def change_base_directory(path):
@@ -64,6 +44,7 @@ def split_sample(opt):
     return dirs
 
 
+# images and labels in different folders
 def files_from_diff_folders(src_img, src_labels):
     img_list = os.listdir(src_img)
     print('Found {} images in source directory'.format(len(img_list)))
@@ -87,14 +68,12 @@ def files_from_diff_folders(src_img, src_labels):
     return images, labels, unused
 
 
-# TODO: add "unused" images
+# images and labels in the same folder,
 def files_from_same_folder(src_db):
     f_list = os.listdir(src_db)
     f_list.sort()
     print('Found {} files in source directory'.format(len(f_list)))
     # images will come before the .txt file when sorted alphabetically (images are .jpg or .png)
-    # TODO: mirar com tallar l'script si falta algun fitxer .txt
-    # TODO: Comprovar si els fitxers .txt tenen alguna label abans de fer l'split_sample!!
 
     for i in range(0, len(f_list), 2):
         if not (f_list[i].endswith('.jpg') or f_list[i].endswith('.png')):
@@ -194,8 +173,6 @@ def split_files(images, labels, opt, unused=None):
     for i in range(N_train):
         shutil.copy(src_img[i], dst_img[i])
         shutil.copy(src_lab[i], dst_lab[i])
-        # TODO: show process bar??
-        # print('Copying image {}/{}'.format(i+1,N_train))
 
     # Copy Validation images and labels
     src_img = [os.path.join(opt.src_db, f) for f in val_img]
@@ -206,8 +183,6 @@ def split_files(images, labels, opt, unused=None):
     for i in range(N_val):
         shutil.copy(src_img[i], dst_img[i])
         shutil.copy(src_lab[i], dst_lab[i])
-        # TODO: show process bar??
-        # print('Copying image {}/{}'.format(i+1, N_val))
 
     if unused:
         unused_dir = os.path.join(opt.dst_db, 'unused')
@@ -291,10 +266,6 @@ if __name__ == '__main__':
                         help='Number of splits for k-fold validation')
 
     param = parser.parse_args()
-
-    # TODO: check, for now, assume is correct
-    #   - src_db is a path
-    #   - train is [0-1]
 
     param.dst_db = change_base_directory(param.dst_db)
 

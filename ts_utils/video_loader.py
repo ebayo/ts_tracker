@@ -1,3 +1,5 @@
+# Video loader for YOLOv5 inference
+
 import cv2
 
 

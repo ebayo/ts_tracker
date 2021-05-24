@@ -1,14 +1,14 @@
-# from ..deep_sort.deep_sort import nn_matching
+# Track TS and RM on one video
+
 import argparse
 import yaml
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 from ts_utils.video_loader import VideoLoader
 from ts_utils import yolov5_bridge as yolo
-import ts_utils as ts
+import ts_utils.bbox_utils as ts
 
 
 def track_ts(opt, hyp):
@@ -34,7 +34,7 @@ def track_ts(opt, hyp):
 
         if frame is None:
             print('Video is finished')
-            break;
+            break
 
         yolo_detect = yolo_net.inference(frame)  # Columns are [x1 y1 x2 y2 conf class] (not normalized)
 
@@ -60,7 +60,8 @@ def track_ts(opt, hyp):
                 color = [j * 255 for j in color]
                 cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), color, 2)
                 cv2.rectangle(frame, (int(bbox[0]), int(bbox[1] - 30)),
-                              (int(bbox[0]) + (len(class_name) + len(str(track.track_id))) * 17, int(bbox[1])), color, -1)
+                              (int(bbox[0]) + (len(class_name) + len(str(track.track_id))) * 17, int(bbox[1])), color,
+                              -1)
                 cv2.putText(frame, class_name + "-" + str(track.track_id), (int(bbox[0]), int(bbox[1] - 10)), 0, 0.75,
                             (255, 255, 255), 2)
 
@@ -76,10 +77,9 @@ def track_ts(opt, hyp):
                 continue
             bbox = track.to_tlbr()
             results_writer.write('{} {} {} {} {} {} {}\n'.format(frame_idx, track.track_id, track.label,
-                                                               bbox[0], bbox[1], bbox[2], bbox[3]))
+                                                                 bbox[0], bbox[1], bbox[2], bbox[3]))
 
         frame_idx += 1
-
 
     vid_loader.close()
     vid_out.release()
@@ -89,17 +89,17 @@ def track_ts(opt, hyp):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('video', type=str,
-                        help='video file to analyse')
+                        help='Video file to track on')
     parser.add_argument('weights', type=str,
-                        help='Yolov5 weights')
+                        help='YOLOv5 weights')
     parser.add_argument('--hyp', type=str, default='data/hyp_gpu.yaml',
                         help='hyperparameters path')
     parser.add_argument('--descriptor_net', type=str, default='data/mars-small128.pb',
                         help='network used to extract descriptors for the detected bounding boxes')
-    parser.add_argument('--result_file', type=str, default='data/results.txt',
+    parser.add_argument('--result_file', type=str, default='output/results.txt',
                         help='File to save the detected boxes with their class and track')
     parser.add_argument('--display', action='store_true')
-    parser.add_argument('--output_video', type=str, default='data/output.mp4')
+    parser.add_argument('--output_video', type=str, default='output/output.mp4')
     parser.add_argument('--save_video', action='store_true')
     parser.add_argument('--torch', action='store_true',
                         help='Flag to use the pytorch implementation of deep_sort')

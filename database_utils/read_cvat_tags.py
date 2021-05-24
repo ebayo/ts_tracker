@@ -1,3 +1,5 @@
+# Read tags from CVAT labeling, organise images with no labels in 'background' and 'test'
+
 import argparse
 import xml.etree.ElementTree as ET
 import os

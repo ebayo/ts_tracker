@@ -1,4 +1,5 @@
-# from ..deep_sort.deep_sort import nn_matching
+# Track TS and RM on all mp4 videos on a folder
+
 import argparse
 import os
 
@@ -26,7 +27,6 @@ def track_ts(vid_path, hyp, yolo_net):
 
     cmap = plt.get_cmap('tab20b')
     colors = [cmap(i)[:3] for i in np.linspace(0, 1, 20)]
-
 
     frame_idx = 0
     for frame in tqdm(vid_loader):
@@ -70,6 +70,7 @@ def track_ts(vid_path, hyp, yolo_net):
             if not track.is_confirmed() or track.time_since_update > 1:
                 continue
             bbox = track.to_tlbr()
+            # Save output file
             results_writer.write('{} {} {} {} {} {} {}\n'.format(frame_idx, track.track_id, track.label,
                                                                bbox[0], bbox[1], bbox[2], bbox[3]))
 
@@ -83,10 +84,10 @@ def track_ts(vid_path, hyp, yolo_net):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('video_folder', type=str,
-                        help='video file to analyse')
-    parser.add_argument('output_folder', type=str, default='results/videos')
+                        help='Folder with videos to track on')
+    parser.add_argument('output_folder', type=str, default='output/videos')
     parser.add_argument('weights', type=str,
-                        help='Yolov5 weights')
+                        help='YOLOv5 weights')
     parser.add_argument('--hyp', type=str, default='data/hyp_gpu.yaml',
                         help='hyperparameters path')
     parser.add_argument('--descriptor_net', type=str, default='data/mars-small128.pb',

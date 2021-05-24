@@ -1,5 +1,6 @@
 # Split files in database is k folds
-# We don't check image file formats --> but to train with yolov5 they must be in TODO [copiar llista]
+# We don't check image file formats --> but to train with yolov5 they must be in
+# IMAGE_FORMATS = ['bmp', 'jpg', 'jpeg', 'png', 'tif', 'tiff', 'dng']
 
 import argparse
 import os
@@ -142,7 +143,7 @@ if __name__ == '__main__':
         print('Copying images without labels...')
         k_split_files(unl_paths, None, param)
 
-    # copy unlabeled images to review if we are not accepting unlabeled images
+    # copy unlabeled images to review, if we are not accepting unlabeled images
     else:
         un_path = os.path.join(param.dst_db, 'unused')
         os.makedirs(un_path, exist_ok=True)

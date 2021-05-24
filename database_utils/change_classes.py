@@ -1,5 +1,5 @@
 # Change classes of the database to include or delete classes
-# If some images end up with no images, move them to "unused folder" --> option?
+# If some images end up with no images, move them to "unused folder" for review
 
 
 import argparse

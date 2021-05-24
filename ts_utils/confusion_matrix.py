@@ -3,8 +3,8 @@ import seaborn as sn
 from pathlib import Path
 import matplotlib.pyplot as plt
 
-# TODO:
-#   [ ] Unify the three functions processing batches
+
+# Adapted from https://github.com/kaanakan/object_detection_confusion_matrix
 
 def box_iou_calc(boxes1, boxes2):
     # https://github.com/pytorch/vision/blob/master/torchvision/ops/boxes.py
@@ -164,8 +164,9 @@ class ConfusionMatrix:
                     error_flag = True
             else:
                 gt_class = gt_classes[i]
-                self.matrix[self.nc, (gt_class)] += 1
-                error_flag = True
+                if gt_class != self.nc:
+                    self.matrix[self.nc, (gt_class)] += 1
+                    error_flag = True
 
         for i, detection in enumerate(detections):
             if all_matches.shape[0] and all_matches[all_matches[:, 1] == i].shape[0] == 0:
@@ -184,7 +185,6 @@ class ConfusionMatrix:
 
     def plot(self, save_dir, names):
         # Adapted from yolov5/metrics.py
-        # TODO: canviar cmap (mirar memòria)
 
         array = self.matrix / (self.matrix.sum(0).reshape(1, self.nc + 1) + 1E-6)  # normalize
         array[array < 0.005] = np.nan  # don't annotate (would appear as 0.00)

@@ -1,8 +1,5 @@
 # Script to show the results of a k-fold validation training
 
-# metrics = ['Epoch', 'gpu_mem', 'GIoU', 'obj', 'cls', 'total', 'targets', 'img_size', 'Class', 'Images' 'Targets',
-# 'P', 'R', 'mAP@.5', 'mAP@.5:.95']
-
 # results.txt headers
 # 0 Epoch --> same as index
 # 1 gpu_mem
@@ -12,13 +9,13 @@
 # 5 total
 # 6 targets
 # 7 img_size
-# 8 Class
-# 9 Images
-# 10 Targets
-# 11 P --> Precision
-# 12 R --> Recall
-# 13 mAP@.5 --> mean Average Precision
-# 14 mAP@.5:.95 --> Mean Average Precision
+# 8 P --> Precision
+# 9 R --> Recall
+# 10 mAP@.5 --> mean Average Precision
+# 11 mAP@.5:.95 --> Mean Average Precision
+# 12 val_los: box
+# 13 val_loss: obj
+# 14 val_loss: cls
 
 import argparse
 import numpy as np
@@ -27,19 +24,11 @@ import matplotlib.pyplot as plt
 
 matplotlib.use('TkAgg')
 
-# TODO:
-#  [ ] check name and extension of name / change "default" according to other parameters (files and metrics)
-#  [ ] add more metrics
-#  [ ] add titles to graphs
-#  [ ] see how can we pass more that one metric
-#  [ ] check the content of the columns
-#  [ ] need of prints??
-
-
-METRICS = {'P': {'col': 11, 'name': 'Precision'},
-           'R': {'col': 12, 'name': 'Recall'},
-           'map5': {'col': 13, 'name': 'mAP@.5'},
-           'map95': {'col': 14, 'name': 'mAP@.5:.95'}}
+METRICS = {'P': {'col': 8, 'name': 'Precision'},
+           'R': {'col': 9, 'name': 'Recall'},
+           'map5': {'col': 10, 'name': 'mAP@.5'},
+           'map95': {'col': 11, 'name': 'mAP@.5:.95'},
+           'fit': {'col': [10, 11], 'name': 'Fitness'}}
 
 
 if __name__ == '__main__':
@@ -47,12 +36,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('files', type=str,
                         help='name of the file with the locations of the results files for each fold')
-    # parser.add_argument('-c', '-classes', type=str,
-    #                    help='File with the name of the classes, same used in database_split')
     parser.add_argument('-m', '--metric', choices=[*METRICS.keys(), 'all'], default='all',
                         help='Metric to show the graphic')
 
-    parser.add_argument('-n', '--name', type=str, default='data/results.png',
+    parser.add_argument('-n', '--name', type=str, default='output/results.png',
                         help='Name and path to save the picture')
 
     param = parser.parse_args()

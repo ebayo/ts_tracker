@@ -1,3 +1,6 @@
+# Computes confusion matrix for either a validation folder or for k-fold validation
+# Saves the images which generate errors with the ground truth, detection and confidence
+
 import argparse
 import yaml
 import os
@@ -10,7 +13,7 @@ from ts_utils.bbox_utils import lxywhn2lxyxy
 import ts_utils.confusion_matrix as cm
 
 
-def find_images_with_errors(val_folder, weights_file, hyp, save_folder, matrix, im_size):
+def find_images_with_errors(val_folder, weights_file, hyp, save_folder, im_size, save_images):
     yolo_model = yolo.Yolo5Model(weights_file, hyp, image_size=im_size)
     image_loader = yolo.ImageLoader(val_folder)
     names = yolo_model.names
@@ -22,6 +25,7 @@ def find_images_with_errors(val_folder, weights_file, hyp, save_folder, matrix, 
         if os.path.exists(lb_path):
             gt = np.loadtxt(lb_path, ndmin=2)
         else:
+            # images with no label file -> image is background image
             gt = np.array([[conf_matrix.nc, 0, 0, 0, 0]])
 
         # xywhn --> x1y1x2y2
@@ -30,12 +34,9 @@ def find_images_with_errors(val_folder, weights_file, hyp, save_folder, matrix, 
         pred = yolo_model.inference(img)  # (x1, y1, x2, y2, conf, class)
         pred = pred.detach().cpu().numpy()
 
+        err = conf_matrix.process_batch_error(pred, gt)
 
-        if matrix:
-            err = conf_matrix.process_batch_error(pred, gt)
-        else:
-            err = conf_matrix.detection_error(pred, gt)
-        if err:
+        if err and save_images:
             color = (0, 255, 0)
             for bbox in gt:
                 if bbox[0] != conf_matrix.nc:
@@ -69,18 +70,18 @@ if __name__ == '__main__':
     parser.add_argument('weights', type=str,
                         help='text file with the locations of the weights for each fold or a single .pt file')
     parser.add_argument('--single_fold', action='store_true')
-    parser.add_argument('-c', '--conf_thr', type=float, default=0.25,
+    parser.add_argument('--conf_thr', type=float, default=0.25,
                         help='Confidence threshold for confusion matrix [0..1]')
-    parser.add_argument('-u', '--iou_thr', type=float, default=0.45,
+    parser.add_argument('--iou_thr', type=float, default=0.45,
                         help='IOU threshold fot confusion matrix [0..1]')
-    parser.add_argument('-d', '--device', type=str, default='cpu',
+    parser.add_argument('--device', type=str, default='cpu',
                         help='Device to use in YOLOv5 inference')
-    parser.add_argument('-s', '--save_dir', type=str, default='data/',
-                        help='Directory where to save the confusion matrix as a figure')
-    parser.add_argument('--matrix', action='store_true',
-                        help="If we want to find the confusion matrix besides the images with errors")
+    parser.add_argument('--save_dir', type=str, default='output/',
+                        help='Directory where to save the confusion matrix as a figure and the images')
     parser.add_argument('--im_size', type=int, default=640,
                         help='image size used for training yolo')
+    parser.add_argument('--save_images', action='store_true',
+                        help='Save images with errors')
 
     param = parser.parse_args()
 
@@ -124,12 +125,11 @@ if __name__ == '__main__':
         print('Processing fold {}/{}'.format(fold, len(val_folders)))
         save = os.path.join(param.save_dir, str(fold))
         os.makedirs(save, exist_ok=True)
-        find_images_with_errors(val, weights, hyper, save, param.matrix, param.im_size)
+        find_images_with_errors(val, weights, hyper, save, param.im_size, param.save_images)
         fold += 1
 
     # plot matrix
-    if param.matrix:
-        print(conf_matrix.matrix)
-        conf_matrix.plot(param.save_dir, classes)
-        save_txt = os.path.join(param.save_dir, 'confusion_matrix.txt')
-        np.savetxt(save_txt, conf_matrix.matrix, fmt='%1d')
+    print(conf_matrix.matrix)
+    conf_matrix.plot(param.save_dir, classes)
+    save_txt = os.path.join(param.save_dir, 'confusion_matrix.txt')
+    np.savetxt(save_txt, conf_matrix.matrix, fmt='%1d')

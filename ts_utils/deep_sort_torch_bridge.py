@@ -1,6 +1,7 @@
-import matplotlib.pyplot as plt
-import cv2
-import numpy as np
+# Bridge between the pytorch implementation of Deep_SORT and the traffic sign tracker.
+# Add label information to tracks. Doesn't use it.
+# TODO: in development
+
 import sys
 
 sys.path.append('../deep_sort_pytorch')

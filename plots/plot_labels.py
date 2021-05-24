@@ -1,6 +1,7 @@
 # Script to plot the labels in the dataset and other similar ideas
 # plot the labels per class
 # plot the number of labels per image
+# IGNORES IMAGES WITH NO LABEL FILE (doesn't plot background images with no label file)
 
 import argparse
 import yaml
@@ -9,9 +10,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-
-# TODO:
-#   [ ] Set pot values so it looks good
 
 def get_label_paths(data_base):
     files = []
@@ -57,7 +55,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('data_base', type=str,
                         help='yaml file passed for training yolov5 with class names and image locations')
-    parser.add_argument('--plot_name', type=str, default='plots/histograms.png')
+    parser.add_argument('--plot_name', type=str, default='output/labels.png')
 
     param = parser.parse_args()
 
@@ -90,7 +88,6 @@ if __name__ == '__main__':
     # ax1.hist_labels(labels, rwidth=0.8)
     width = 0.8
     x = np.arange(db['nc'])
-    # TODO: canviar color?? mirar memòria, color=(xx, yy, zz) --> ax1/2.bar(...., color=color)
     rect1 = ax1.bar(x, hist_labels, width, color='#007dcd')
     ax1.set_xlabel('classes')
     ax1.set_xticks(x)
@@ -110,9 +107,4 @@ if __name__ == '__main__':
     plt.savefig(param.plot_name)
     plt.show()
 
-    # top=0.963,
-    # bottom=0.155,
-    # left=0.028,
-    # right=0.992,
-    # hspace=0.2,
-    # wspace=0.082
+

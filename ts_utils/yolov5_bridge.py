@@ -1,3 +1,5 @@
+# Bridge between YOLOv5 code and the ts_tracker
+
 import torch
 import sys
 import numpy as np
@@ -5,8 +7,8 @@ import numpy as np
 import glob
 import os
 import cv2
-from pathlib import Path
 
+# sys.path.append('../yolov5_ts_detect')
 sys.path.append('../yolov5')
 import utils.general as gen
 import utils.torch_utils as tu
@@ -26,7 +28,6 @@ class Yolo5Model:
             self.iou_th = hyp['iou_th']
             self.model = torch.load(weights, map_location=self.device)['model'].float().fuse().eval()
             print('Model loaded successfully.\n')
-            #print(self.model)
             self.names = self.model.module.names if hasattr(self.model, 'module') else self.model.names
 
     def get_name(self, idx):
@@ -35,7 +36,6 @@ class Yolo5Model:
     def inference(self, im0):
         # from yolov5/ts_utils/datasets.py > LoadImages
         # Padded resize
-
         img = ds.letterbox(im0, new_shape=self.img_size)[0]
 
         # Convert
@@ -68,7 +68,7 @@ class Yolo5Model:
         return self.model.named_parameters()
 
 
-class ImageLoader:  # for inference
+class ImageLoader:  # for inference, used in confusion_matrix_images.py
     # Adapted from yolov5/ts_utils/datasets.py
 
     def __init__(self, path, img_size=640, stride=32):

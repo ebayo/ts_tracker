@@ -1,7 +1,8 @@
+# Auxiliary functions to change bounding boxes annotation formats
+
 import numpy as np
 import torch
 
-# Auxiliar functions
 
 def xyxy2tlwh(x):
     # from yolov5 [x1 y1 x2 y2] --> [x1 y1 w h]
