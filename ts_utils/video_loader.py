@@ -5,7 +5,7 @@ import cv2
 
 class VideoLoader:
 
-    def __init__(self, vid_path, im_size):
+    def __init__(self, vid_path, im_size=0):
         self.capture = cv2.VideoCapture(vid_path)
         self.current_frame = 0
         self.num_frames = int(self.capture.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -28,6 +28,9 @@ class VideoLoader:
 
     def close(self):
         self.capture.release()
+
+    def get_size(self):
+        return int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH)), int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     def initialise_video_writer(self, file_name):
         width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
