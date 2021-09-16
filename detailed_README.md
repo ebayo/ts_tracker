@@ -5,7 +5,7 @@
 
 Script used to create a mock-up verison of the tracking results adding a visual warning on the top left corner when certain signs or markigs are detected that warn the cyclist of potenntial car or pedestrian crossings. 
 
-It uses an MP4 video and a text file with the same name and in the same folder containing the detections (the output from [tracking](./track.py)
+It uses an MP4 video and a text file with the same name and in the same folder containing the detections (the output from [tracking](./track.py))
 
 
 ## confusion_matrix_images.py
@@ -36,13 +36,9 @@ Confusion matrix saved as image in ```save_dir``` or ```output``` with the value
 
 If selected, the images wich contribute wo errors with the bounding boxes of the ground truth in green and their label and the detections in red, their label and confidence score. This helps to see the images where the network is making mistakes more subjectively.
 
----
-
 ## Data
 
 This folder contains additional data used by the tracker, specifically some hyperparameters and the feature extractor network.
-
----
 
 ## Database_utils
 
