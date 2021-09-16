@@ -50,4 +50,4 @@ The bounding boxes are also saved in the ```result_file``` and are saved in colu
 
 ## Other functionalities
 
-The other scripts in this project are used to plot and change the database used and to study the results from both detection and tracking. A more detailed description and usage of these can be und in [detailed_README.md](detailed_README.md)
+The other scripts in this project are used to plot and change the database used and to study the results from both detection and tracking. A more detailed description and usage of these can be und in [detailed_README.md](./detailed_README.md)
