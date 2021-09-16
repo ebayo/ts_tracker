@@ -15,7 +15,7 @@ Use ```git clone --branch v5.0 https://github.com/ultralytics/yolov5.git``` to c
 
 - [deep_sort](https://github.com/nwojke/deep_sort) needs to be in the parent directory (or change the location in deep_sort_bridge.py)
      - Tensorflow in version 1.5 (gives a security alert to upgrade to version >=2.4.0)
-     - scikit-learn==0.22.2,because it used a depecrated function in later releases. Possible solution [here][https://stackoverflow.com/questions/62390517/no-module-named-sklearn-utils-linear-assignment]
+     - scikit-learn==0.22.2,because it used a depecrated function in later releases. Possible solution [here](https://stackoverflow.com/questions/62390517/no-module-named-sklearn-utils-linear-assignment)
 
 ### Usage
 
